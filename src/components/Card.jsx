@@ -2,11 +2,13 @@ import data from '../data.json'
 import { useDispatch, useSelector } from 'react-redux'
 import { addData } from '../redux/jobSlice'
 import { nanoid } from '@reduxjs/toolkit'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 function Card() {
   const dispatch = useDispatch()
   const jobData = useSelector((data) => data.job.data)
+  const [values, setValues] = useState(data)
+
   const handleClick = (e) => {
     const val = e.target.textContent
     const valid = jobData.some((test) => test.name === val)
@@ -15,7 +17,23 @@ function Card() {
     }
   }
 
-  return data.map((val) => {
+  useEffect(() => {
+    if (jobData.length === 0) {
+      setValues(data)
+      return
+    }
+    const filterJobName = jobData.map((item) => {
+      return item.name
+    })
+    const filteredJobs = data.filter((job) => {
+      const { role, level, languages, tools } = job
+      const tags = [role, level, ...languages, ...tools]
+      return filterJobName.every((filter) => tags.includes(filter))
+    })
+    setValues(filteredJobs)
+  }, [jobData])
+
+  return values.map((val) => {
     return (
       <div
         className="bg-white shadow-xl rounded-md flex flex-col md:flex-row items-start md:items-center justify-between p-6 relative gap-y-4 md:gap-y-0 hover:bg-light-grayish-cyan-background cursor-pointer hover:scale-105 hover:border-l-4 hover:border-desaturated-dark-cyan"
